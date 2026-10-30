@@ -44,6 +44,7 @@ export function digest(night: string, text: string): Night {
         owner: run.owner,
         runs: 1,
         retries: run.status === 'retry' ? 1 : 0,
+        fails: run.status === 'fail' ? 1 : 0,
         lastStatus: run.status,
         lastError: run.error ?? null,
         firstAt: run.at,
@@ -54,6 +55,7 @@ export function digest(night: string, text: string): Night {
     // Lines are in time order: the latest line sets owner, status and error.
     row.runs++;
     if (run.status === 'retry') row.retries++;
+    if (run.status === 'fail') row.fails++;
     row.owner = run.owner ?? row.owner;
     row.lastStatus = run.status;
     row.lastError = run.error ?? null;

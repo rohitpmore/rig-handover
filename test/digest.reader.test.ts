@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { readNight } from '../src/digest/reader.js';
+import { digest, readNight } from '../src/digest/reader.js';
 
 describe('readNight', () => {
   it('reads runs/2026-10-28.jsonl into 5 jobs and counts the 1 bad line', () => {
@@ -26,6 +26,7 @@ describe('readNight', () => {
       owner: 'rook',
       runs: 4,
       retries: 3,
+      fails: 0,
       lastStatus: 'ok',
       lastError: null,
       firstAt: '2026-10-29T01:30:00+01:00',
@@ -54,5 +55,18 @@ describe('readNight', () => {
       counts: { ok: 0, retry: 0, fail: 0 },
       badLines: 0,
     });
+  });
+});
+
+describe('digest', () => {
+  it('counts a fail even when a later run of the job recovered', () => {
+    const n = digest(
+      '2026-10-30',
+      [
+        '{"at":"2026-10-30T01:00:00+01:00","job":"notes/backup","status":"fail","owner":"lane-07","error":"quota exceeded"}',
+        '{"at":"2026-10-30T02:00:00+01:00","job":"notes/backup","status":"ok","owner":"lane-07"}',
+      ].join('\n'),
+    );
+    expect(n.rows[0]).toMatchObject({ runs: 2, fails: 1, lastStatus: 'ok', lastError: null });
   });
 });

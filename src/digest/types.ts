@@ -19,6 +19,7 @@ export type DigestRow = {
   owner: string | null;
   runs: number;
   retries: number;
+  fails: number; // any `fail` line, even if a later run recovered
   lastStatus: RunStatus;
   lastError: string | null;
   firstAt: string;
